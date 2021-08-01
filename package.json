@@ -1,0 +1,24 @@
+{
+  "name": "gatsby-transformer-svg-sprites",
+  "description": "Create SVG sprites from GraphQL sources",
+  "version": "0.0.1",
+  "author": "stldo (https://github.com/stldo)",
+  "license": "MIT",
+  "repository": "https://github.com/stldo/gatsby-transformer-svg-sprites",
+  "keywords": [
+    "gatsby",
+    "gatsby-plugin",
+    "svg",
+    "sprite",
+    "svg sprite"
+  ],
+  "scripts": {
+    "postversion": "git push && git push --tags"
+  },
+  "dependencies": {
+    "incstr": "^1.2.3",
+    "micromatch": "^4.0.4",
+    "svg-mixer": "^2.3.14",
+    "svgo": "^2.3.1"
+  }
+}
