@@ -1,6 +1,6 @@
 # gatsby-transformer-svg-sprites
 
-Gatsby plugin for creating SVG sprites from GraphQL sources.
+Gatsby plugin to generate SVG sprites from GraphQL sources.
 
 ## Install
 
