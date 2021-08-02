@@ -18,7 +18,7 @@ module.exports = {
     {
       resolve: `gatsby-transformer-svg-sprites`,
       options: {
-        minify: process.env.NODE_ENV === 'production',
+        optimize: process.env.NODE_ENV === 'production',
         skip: '',
         /* ...SVG Mixer options */
       },
@@ -38,7 +38,7 @@ configuration can be found [here][1].
 
 [1]: https://github.com/JetBrains/svg-mixer/tree/master/packages/svg-mixer#configuration
 
-### minify
+### optimize
 
 Default: `process.env.NODE_ENV === 'production'`; Type: `boolean`.
 

@@ -4,7 +4,7 @@ const incstr = require('incstr')
 const micromatch = require('micromatch')
 const path = require('path')
 const { Compiler, Image, SpriteSymbol } = require('svg-mixer')
-const { extendDefaultPlugins, optimize } = require('svgo')
+const { extendDefaultPlugins, optimize: svgoOptimize } = require('svgo')
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 const NODE_TYPE = 'SvgSprites'
@@ -31,10 +31,10 @@ async function createSvg (nodes = [], compilerOptions = {}) {
   return content
 }
 
-async function getId (node, cache, minify = IS_PRODUCTION) {
+async function getId (node, cache, optimize = IS_PRODUCTION) {
   const { contentDigest } = node.internal
 
-  if (!minify) {
+  if (!optimize) {
     return `${node.name}--${contentDigest.slice(0, 5)}`
   }
 
@@ -83,7 +83,7 @@ async function unlinkSvg (filename) {
 
 exports.createPages = async (
   { cache, getNodesByType },
-  { skip: _, plugins: __, minify = IS_PRODUCTION, ...svgMixer }
+  { skip: _, plugins: __, optimize = IS_PRODUCTION, ...svgMixer }
 ) => {
   const content = await createSvg(getNodesByType(NODE_TYPE), svgMixer)
   const hash = crypto.createHash('md5').update(content).digest('hex')
@@ -91,7 +91,7 @@ exports.createPages = async (
 
   await writeFile(
     path.resolve('public', filename),
-    !minify ? content : optimize(content, SVGO_OPTIONS).data
+    !optimize ? content : svgoOptimize(content, SVGO_OPTIONS).data
   )
 
   await cache.set('filename', filename)
@@ -117,7 +117,7 @@ exports.createResolvers = ({ createResolvers, pathPrefix }) => {
   })
 }
 
-exports.onCreateNode = async (helpers, { minify, skip = '' }) => {
+exports.onCreateNode = async (helpers, { optimize, skip = '' }) => {
   const { node } = helpers
 
   if (
@@ -138,7 +138,7 @@ exports.onCreateNode = async (helpers, { minify, skip = '' }) => {
   } = helpers
 
   const content = await loadNodeContent(node)
-  const id = await getId(node, cache, minify)
+  const id = await getId(node, cache, optimize)
   const spriteSymbol = getSpriteSymbol(id, content)
 
   const child = {
