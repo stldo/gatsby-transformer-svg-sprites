@@ -1,7 +1,7 @@
 {
   "name": "gatsby-transformer-svg-sprites",
   "description": "Gatsby plugin to generate SVG sprites from GraphQL sources",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "stldo (https://github.com/stldo)",
   "license": "MIT",
   "repository": "https://github.com/stldo/gatsby-transformer-svg-sprites",
