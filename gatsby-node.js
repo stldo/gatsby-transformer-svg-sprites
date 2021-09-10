@@ -4,15 +4,19 @@ const incstr = require('incstr')
 const micromatch = require('micromatch')
 const path = require('path')
 const { Compiler, Image, SpriteSymbol } = require('svg-mixer')
-const { extendDefaultPlugins, optimize: svgoOptimize } = require('svgo')
+const { optimize: svgoOptimize } = require('svgo')
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 const NODE_TYPE = 'SvgSprites'
 const SVGO_OPTIONS = {
-  plugins: extendDefaultPlugins([{
-    name: 'cleanupIDs',
-    active: false
-  }])
+  plugins: [{
+    name: 'preset-default',
+    params: {
+      overrides: {
+        cleanupIDs: false
+      }
+    }
+  }]
 }
 
 const localCache = { spriteSymbols: new Map() }
