@@ -110,7 +110,7 @@ exports.createResolvers = ({ createResolvers, pathPrefix }) => {
   createResolvers({
     [NODE_TYPE]: {
       url: {
-        resolve({ url }, _, { nodeModel, path }) {
+        resolve ({ url }, _, { nodeModel, path }) {
           /* Connect to NODE_TYPE, so the url property is updated
           every time a new sprite file is saved */
           nodeModel.createPageDependency({ path, connection: NODE_TYPE })

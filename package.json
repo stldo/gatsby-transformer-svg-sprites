@@ -13,6 +13,7 @@
     "svg sprite"
   ],
   "scripts": {
+    "lint": "eslint --cache --ext js ./",
     "postversion": "git push && git push --tags"
   },
   "dependencies": {
@@ -20,5 +21,12 @@
     "micromatch": "^4.0.4",
     "svg-mixer": "^2.3.14",
     "svgo": "^2.5.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.2.0"
   }
 }
