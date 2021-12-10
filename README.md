@@ -78,7 +78,7 @@ Type: `Object`. Default: `{}`.
 The `options` object is passed to __SVG Mixer__. More info about its
 configuration can be found [here][1].
 
-[1]: https://github.com/JetBrains/svg-mixer/tree/master/packages/svg-mixer#configuration
+
 
 ### optimize
 
@@ -96,4 +96,7 @@ supports glob patterns.
 
 ## License
 
-[The MIT License](./LICENSE)
+[The MIT License][license]
+
+[1]: https://github.com/JetBrains/svg-mixer/tree/master/packages/svg-mixer#configuration
+[license]: ./LICENSE
