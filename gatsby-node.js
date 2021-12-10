@@ -1,10 +1,13 @@
 const crypto = require('crypto')
-const { unlink, writeFile } = require('fs').promises
-const incstr = require('incstr')
+const { writeFile } = require('fs/promises')
 const micromatch = require('micromatch')
 const path = require('path')
-const { Compiler, Image, SpriteSymbol } = require('svg-mixer')
 const { optimize: svgoOptimize } = require('svgo')
+
+const createSvg = require('./lib/create-svg')
+const getId = require('./lib/get-id')
+const getSpriteSymbol = require('./lib/get-sprite-symbol')
+const unlinkSvg = require('./lib/unlink-svg')
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 const NODE_TYPE = 'SvgSprites'
@@ -19,109 +22,48 @@ const SVGO_OPTIONS = {
   }]
 }
 
-const localCache = { spriteSymbols: new Map() }
-
-async function createSvg (nodes = [], compilerOptions = {}) {
-  const compiler = new Compiler(compilerOptions)
-
-  for (const node of nodes) {
-    const id = node.url.slice(1)
-    const spriteSymbol = getSpriteSymbol(id, node.internal.content)
-    compiler.addSymbol(spriteSymbol)
-  }
-
-  const { content } = await compiler.compile()
-
-  return content
-}
-
-async function getId (node, cache, optimize = IS_PRODUCTION) {
-  const { contentDigest } = node.internal
-
-  if (!optimize) {
-    return `${node.name}--${contentDigest.slice(0, 5)}`
-  }
-
-  const cacheKey = `CACHE___${node.relativePath}`
-  const cachedId = await cache.get(cacheKey)
-
-  if (cachedId) {
-    return cachedId
-  }
-
-  const lastId = await cache.get('lastId')
-
-  if (!localCache.nextId) {
-    localCache.nextId = incstr.idGenerator({
-      alphabet: 'bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ0123456789',
-      lastId
-    })
-  }
-
-  const id = localCache.nextId()
-
-  await cache.set(cacheKey, id)
-  await cache.set('lastId', id)
-
-  return id
-}
-
-function getSpriteSymbol (id, content) {
-  let spriteSymbol = localCache.spriteSymbols.get(id)
-
-  if (!spriteSymbol) {
-    spriteSymbol = new SpriteSymbol(id, new Image('', content))
-    localCache.spriteSymbols.set(id, spriteSymbol)
-  }
-
-  return spriteSymbol
-}
-
-async function unlinkSvg (filename) {
-  if (filename) {
-    await unlink(path.resolve('public', filename)).catch(error => {
-      if (error.code !== 'ENOENT') throw error
-    })
-  }
-}
-
 exports.createPages = async (
   { cache, getNodesByType },
   { skip: _, plugins: __, optimize = IS_PRODUCTION, ...svgMixer }
 ) => {
-  const content = await createSvg(getNodesByType(NODE_TYPE), svgMixer)
+  const nodes = getNodesByType(NODE_TYPE)
+  const content = await createSvg(nodes, svgMixer)
   const hash = crypto.createHash('md5').update(content).digest('hex')
   const filename = `sprites.${hash}.svg`
+
+  const previousFilename = await cache.get('filename')
+
+  await cache.set('filename', filename)
 
   await writeFile(
     path.resolve('public', filename),
     !optimize ? content : svgoOptimize(content, SVGO_OPTIONS).data
   )
 
-  await cache.set('filename', filename)
-
-  if (filename !== localCache.filename) {
-    await unlinkSvg(localCache.filename)
-    localCache.filename = filename
+  if (previousFilename && previousFilename !== filename) {
+    await unlinkSvg(previousFilename)
   }
 }
 
-exports.createResolvers = ({ createResolvers, pathPrefix }) => {
+exports.createResolvers = async ({ cache, createResolvers, pathPrefix }) => {
   createResolvers({
     [NODE_TYPE]: {
       url: {
-        resolve ({ url }, _, { nodeModel, path }) {
+        async resolve ({ url }, _, { nodeModel, path }) {
           /* Connect to NODE_TYPE, so the url property is updated
           every time a new sprite file is saved */
           nodeModel.createPageDependency({ path, connection: NODE_TYPE })
-          return `${pathPrefix}/${localCache.filename}${url}`
+          return `${pathPrefix}/${await cache.get('filename')}${url}`
         }
       }
     }
   })
 }
 
-exports.onCreateNode = async (helpers, { optimize, skip = '' }) => {
+exports.onCreateNode = async (helpers, {
+  optimize = IS_PRODUCTION,
+  skip = ''
+}) => {
   const { node } = helpers
 
   if (
@@ -161,10 +103,15 @@ exports.onCreateNode = async (helpers, { optimize, skip = '' }) => {
   }
 
   await createNode(child)
+
   createParentChildLink({ child, parent: node })
 }
 
 exports.onPreBootstrap = async ({ cache }) => {
-  await unlinkSvg(await cache.get('filename'))
+  const filename = await cache.get('filename')
   await cache.set('filename', null)
+
+  if (filename) {
+    await unlinkSvg(filename)
+  }
 }
