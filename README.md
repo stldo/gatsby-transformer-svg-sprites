@@ -13,7 +13,7 @@ Enable the plugin in `gatsby-config.js`:
 ```js
 module.exports = {
   plugins: [
-    `gatsby-transformer-svg-sprites`
+    'gatsby-transformer-svg-sprites'
   ]
 }
 ```
@@ -60,7 +60,7 @@ export const query = graphql`
 module.exports = {
   plugins: [
     {
-      resolve: `gatsby-transformer-svg-sprites`,
+      resolve: 'gatsby-transformer-svg-sprites',
       // options: {
       //   optimize: process.env.NODE_ENV === 'production',
       //   skip: '',
