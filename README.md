@@ -11,6 +11,8 @@ npm install gatsby-transformer-svg-sprites
 ## Usage
 
 ```js
+/* gatsby-config.js */
+
 module.exports = {
   plugins: [
     {
