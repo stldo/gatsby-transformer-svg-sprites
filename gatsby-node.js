@@ -16,7 +16,8 @@ const SVGO_OPTIONS = {
     name: 'preset-default',
     params: {
       overrides: {
-        cleanupIDs: false
+        cleanupIDs: false,
+        inlineStyles: false
       }
     }
   }]
